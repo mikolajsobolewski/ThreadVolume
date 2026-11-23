@@ -68,6 +68,18 @@ class Rollover extends AbstractService
             throw new \RuntimeException("Thread $threadId has no forum.");
         }
         [$sourceTitle, $nextTitle] = VolumeRules::titles($source->title);
+        // Serialize naming decisions by forum and read current titles after obtaining the lock.
+        $db->fetchOne('SELECT node_id FROM xf_forum WHERE node_id = ? FOR UPDATE', $source->node_id);
+        if ($db->fetchOne(
+            "SELECT thread_id FROM xf_thread
+             WHERE node_id = ? AND thread_id <> ? AND discussion_type <> 'redirect'
+               AND discussion_state <> 'deleted' AND title IN (?, ?)
+             LIMIT 1 FOR SHARE",
+            [$source->node_id, $source->thread_id, $sourceTitle, $nextTitle]
+        ))
+        {
+            return null;
+        }
 
         return \XF::asVisitor($bot, function () use ($db, $source, $sourceTitle, $nextTitle, $forum)
         {
@@ -107,6 +119,11 @@ class Rollover extends AbstractService
                 'source_thread_id' => $source->thread_id,
                 'next_thread_id' => $next->thread_id,
             ]);
+
+            $db->update('xf_thread_watch', ['thread_id' => $next->thread_id],
+                'thread_id = ?', $source->thread_id);
+            // Queue inside the transaction so an aborted rollover cannot announce a new volume.
+            $this->service(OpeningNotifierService::class, $next->FirstPost, 'reply')->queueForWatchers();
 
             return $next->thread_id;
         });

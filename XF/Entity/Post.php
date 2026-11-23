@@ -26,11 +26,11 @@ class Post extends XFCP_Post
             && $thread && $thread->discussion_open && $thread->isVisible()
             && VolumeRules::reachedLimit($thread->reply_count))
         {
-            $this->app()->jobManager()->enqueueUnique(
-                'xsThreadVolume-' . $thread->thread_id,
+            // Keep a separate job per visibility change. A running job may finish
+            // below the threshold while another post is reaching it again.
+            $this->app()->jobManager()->enqueue(
                 ContinueThread::class,
-                ['threadId' => $thread->thread_id],
-                false
+                ['threadId' => $thread->thread_id]
             );
         }
     }
