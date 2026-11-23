@@ -121,7 +121,7 @@ try
         $third = $em->find('XF:Thread', $nextId($secondId));
         check($third && $third->title === "$marker том 3", 'volume 2 continues into volume 3');
 
-        $legacy = $make("$marker т.3");
+        $legacy = $make("$marker (т. 3)");
         for ($i = 0; $i < 41; $i++)
         {
             $reply($legacy, 'visible', true)->save();
@@ -150,7 +150,7 @@ try
         }
         $row = $db->fetchRow('SELECT title, discussion_open, sticky, reply_count FROM xf_thread WHERE thread_id = ?',
             $legacy->thread_id);
-        check($row['title'] === "$marker т.3" && $row['discussion_open'] && $row['sticky']
+        check($row['title'] === "$marker (т. 3)" && $row['discussion_open'] && $row['sticky']
             && (int) $row['reply_count'] === 41 && !$nextId($legacy->thread_id)
             && (int) $db->fetchOne('SELECT COUNT(*) FROM xf_thread WHERE title = ?', "$marker том 4") === 0,
             'failed rollover rolls back the new thread, notices, rename and pin transfer');
@@ -166,7 +166,7 @@ try
         $newId = $nextId($legacy->thread_id);
         $em->clearEntityCache();
         check($newId && $em->find('XF:Thread', $newId)->title === "$marker том 4"
-            && $em->find('XF:Thread', $legacy->thread_id)->title === "$marker т.3",
+            && $em->find('XF:Thread', $legacy->thread_id)->title === "$marker (т. 3)",
             'legacy numbering rolls forward without renaming the source');
 
         $node = $em->create('XF:Node');

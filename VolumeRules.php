@@ -13,10 +13,11 @@ final class VolumeRules
 
     public static function titles(string $title): array
     {
-        if (preg_match('/^(.+?)\s+(?:том\s+|т\.\s*)([1-9][0-9]*)$/iuD', $title, $parts)
-            && strlen($parts[2]) < 18)
+        // A legacy volume marker may be wrapped in a matching pair of parentheses.
+        if (preg_match('/^(.+?)\s+(?:(\()\s*)?(?:том\s+|т(?:\.\s*|\s+))([1-9][0-9]*)(?(2)\s*\))$/iuD', $title, $parts)
+            && strlen($parts[3]) < 18)
         {
-            return [$title, self::numberedTitle($parts[1], (int) $parts[2] + 1)];
+            return [$title, self::numberedTitle($parts[1], (int) $parts[3] + 1)];
         }
 
         return [self::numberedTitle($title, 1), self::numberedTitle($title, 2)];

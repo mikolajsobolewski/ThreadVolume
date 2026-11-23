@@ -11,6 +11,10 @@ $checks = [
     'first rollover' => [VolumeRules::titles('Название'), ['Название том 1', 'Название том 2']],
     'modern volume' => [VolumeRules::titles('Название том 2'), ['Название том 2', 'Название том 3']],
     'legacy volume' => [VolumeRules::titles('Вопросы и ответы по форуму т.3'), ['Вопросы и ответы по форуму т.3', 'Вопросы и ответы по форуму том 4']],
+    'parenthesized legacy volume' => [VolumeRules::titles('Сиськи! Фото (т. 2)'), ['Сиськи! Фото (т. 2)', 'Сиськи! Фото том 3']],
+    'parenthesized full volume' => [VolumeRules::titles('Название (Том 2)'), ['Название (Том 2)', 'Название том 3']],
+    'legacy abbreviation without a dot' => [VolumeRules::titles('Название т 2'), ['Название т 2', 'Название том 3']],
+    'unmatched parenthesis' => [VolumeRules::titles('Название т. 2)'), ['Название т. 2) том 1', 'Название т. 2) том 2']],
     'number inside title' => [VolumeRules::titles('Тема т.3 из архива'), ['Тема т.3 из архива том 1', 'Тема т.3 из архива том 2']],
 ];
 $errors = 0;
