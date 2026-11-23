@@ -2,9 +2,22 @@
 
 XenForo 2.3.10+ add-on for continuing open discussions in the same forum after 40 visible posts. The first post of a continuation counts toward that limit. The closing notice is added after the limit is reached.
 
-Set the service account in the **Thread Volume** option group. The site default is user ID 2 (OnanizmBot). Setting the ID to zero pauses rollover.
+Add the site settings to XenForo’s `src/config.php`:
+
+```php
+$config['xsThreadVolume'] = [
+    'botUserId' => 2, // OnanizmBot on onanizm.club
+    'postLimit' => 40,
+];
+```
+
+Use a valid service account ID. An absent or zero ID keeps rollover disabled. The post limit must be an integer of at least 2 and defaults to 40. The config replaces the former admin option.
 
 When a thread already has at least 40 visible posts, it continues after the next visible reply. A title conflict in the same forum leaves the source open for review. Existing subscriptions and their email preferences follow the new volume. Subscribers receive the opening notification under their usual XenForo settings.
+
+## Build
+
+Run `php build.php --dry-run` to inspect the package contents, or `php build.php` to create a XenForo installation ZIP under `_releases/`. The GitHub Actions build runs checks and uploads the ZIP as an artifact.
 
 ## Verification
 

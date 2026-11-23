@@ -5,6 +5,7 @@ use XF\Job\Notifier;
 use XF\PrintableException;
 use XF\Service\Thread\CreatorService;
 use XF\Service\Thread\ReplierService;
+use XS\ThreadVolume\Config;
 use XS\ThreadVolume\Job\ContinueThread;
 use XS\ThreadVolume\Service\OpeningNotifierService;
 use XS\ThreadVolume\Service\Rollover;
@@ -24,7 +25,7 @@ $app->start();
 $app->options()->watchAlertActiveOnly = ['enabled' => false];
 $db = $app->db();
 $em = $app->em();
-$bot = $em->find('XF:User', $app->options()->xsThreadVolumeBotUserId);
+$bot = $em->find('XF:User', Config::from($app->config('xsThreadVolume'))->botUserId);
 $forum = $em->findOne('XF:Forum', ['forum_type_id' => 'discussion', 'require_prefix' => 0, 'min_tags' => 0]);
 if (!$bot || !$forum)
 {
@@ -263,6 +264,27 @@ try
         $questionNext = $em->find('XF:Thread', $rollover->apply($question->thread_id));
         check($questionNext && $questionNext->node_id === $testNodeId && $questionNext->discussion_type === 'question',
             'continuation uses the default type where discussion is unavailable');
+
+
+        $savedConfig = $app->config();
+        $customConfig = $savedConfig;
+        $customConfig['xsThreadVolume']['postLimit'] = 3;
+        $app->container()['config'] = $customConfig;
+        try
+        {
+            $short = $make("$marker custom threshold");
+            $reply($short)->save();
+            check(!$countJob($short->thread_id), 'two posts are below the configured limit of three');
+            $reply($short)->save();
+            check($countJob($short->thread_id) === 1, 'third post queues continuation at the configured limit');
+            $jobId = $jobs($short->thread_id)[0];
+            $app->jobManager()->runById($jobId, 10);
+            check((bool) $nextId($short->thread_id), 'worker rechecks the same configured limit');
+        }
+        finally
+        {
+            $app->container()['config'] = $savedConfig;
+        }
 
     });
 }

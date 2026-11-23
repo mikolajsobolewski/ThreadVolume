@@ -3,6 +3,7 @@
 namespace XS\ThreadVolume\XF\Entity;
 
 use XF\Mvc\Entity\Structure;
+use XS\ThreadVolume\Config;
 use XS\ThreadVolume\Job\ContinueThread;
 use XS\ThreadVolume\VolumeRules;
 
@@ -19,12 +20,13 @@ class Post extends XFCP_Post
     {
         parent::_postSave();
 
+        $config = Config::from($this->app()->config('xsThreadVolume'));
         $thread = $this->Thread;
         if ($this->isStateChanged('message_state', 'visible') === 'enter'
             && !$this->getOption('xs_thread_volume_notice')
-            && $this->app()->options()->xsThreadVolumeBotUserId
+            && $config->botUserId
             && $thread && $thread->discussion_open && $thread->isVisible()
-            && VolumeRules::reachedLimit($thread->reply_count))
+            && VolumeRules::reachedLimit($thread->reply_count, $config->postLimit))
         {
             // Keep a separate job per visibility change. A running job may finish
             // below the threshold while another post is reaching it again.

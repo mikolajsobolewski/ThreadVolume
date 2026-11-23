@@ -6,6 +6,7 @@ use XF\Entity\Thread;
 use XF\Service\AbstractService;
 use XF\Service\Thread\CreatorService;
 use XF\Service\Thread\ReplierService;
+use XS\ThreadVolume\Config;
 use XS\ThreadVolume\VolumeRules;
 
 class Rollover extends AbstractService
@@ -34,20 +35,22 @@ class Rollover extends AbstractService
 
     private function createContinuation(int $threadId): ?int
     {
+        $config = Config::from($this->app->config('xsThreadVolume'));
+        if (!$config->botUserId)
+        {
+            return null;
+        }
+
         $db = $this->db();
         $row = $db->fetchRow('SELECT * FROM xf_thread WHERE thread_id = ? FOR UPDATE', $threadId);
         if (!$row || !$row['discussion_open'] || $row['discussion_state'] !== 'visible'
-            || $row['discussion_type'] === 'redirect' || !VolumeRules::reachedLimit((int) $row['reply_count'])
+            || $row['discussion_type'] === 'redirect' || !VolumeRules::reachedLimit((int) $row['reply_count'], $config->postLimit)
             || $db->fetchOne('SELECT next_thread_id FROM xf_xs_thread_volume WHERE source_thread_id = ?', $threadId))
         {
             return null;
         }
 
-        $botId = (int) $this->app->options()->xsThreadVolumeBotUserId;
-        if (!$botId)
-        {
-            return null;
-        }
+        $botId = $config->botUserId;
         $bot = $this->app->em()->find('XF:User', $botId);
         if (!$bot)
         {

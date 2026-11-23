@@ -4,11 +4,9 @@ namespace XS\ThreadVolume;
 
 final class VolumeRules
 {
-    public const MIN_REPLIES = 39;
-
-    public static function reachedLimit(int $replyCount): bool
+    public static function reachedLimit(int $replyCount, int $postLimit = Config::DEFAULT_POST_LIMIT): bool
     {
-        return $replyCount >= self::MIN_REPLIES;
+        return $replyCount >= $postLimit - 1;
     }
 
     public static function titles(string $title): array

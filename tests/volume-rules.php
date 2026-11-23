@@ -1,10 +1,19 @@
 <?php
 
+require __DIR__ . '/../Config.php';
 require __DIR__ . '/../VolumeRules.php';
 
+use XS\ThreadVolume\Config;
 use XS\ThreadVolume\VolumeRules;
 
+$custom = Config::from(['botUserId' => 17, 'postLimit' => 3]);
 $checks = [
+    'missing config disables rollover' => [Config::from(null)->botUserId, 0],
+    'invalid limit disables rollover' => [Config::from(['botUserId' => 17, 'postLimit' => 1])->botUserId, 0],
+    'configured bot ID' => [$custom->botUserId, 17],
+    'default post limit' => [Config::from(['botUserId' => 17])->postLimit, 40],
+    'two posts below configured limit' => [VolumeRules::reachedLimit(1, $custom->postLimit), false],
+    'three posts reach configured limit' => [VolumeRules::reachedLimit(2, $custom->postLimit), true],
     '39 visible posts' => [VolumeRules::reachedLimit(38), false],
     '40 visible posts' => [VolumeRules::reachedLimit(39), true],
     'historical volume over limit' => [VolumeRules::reachedLimit(1600), true],
