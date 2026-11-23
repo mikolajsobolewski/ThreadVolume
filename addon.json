@@ -1,0 +1,19 @@
+{
+    "legacy_addon_id": "",
+    "title": "Thread Volume",
+    "description": "Continue long discussions in linked volumes.",
+    "version_id": 1000070,
+    "version_string": "1.0.0",
+    "dev": "Onanizm.Club",
+    "dev_url": "",
+    "faq_url": "",
+    "support_url": "",
+    "extra_urls": [],
+    "require": {
+        "XF": [
+            2031070,
+            "XenForo 2.3.10+"
+        ]
+    },
+    "icon": ""
+}

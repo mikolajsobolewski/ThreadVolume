@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phrases>
+  <phrase title="option_group.xsThreadVolume" version_id="1000070" version_string="1.0.0"><![CDATA[Thread Volume]]></phrase>
+  <phrase title="option.xsThreadVolumeBotUserId" version_id="1000070" version_string="1.0.0"><![CDATA[Service account user ID]]></phrase>
+  <phrase title="option_explain.xsThreadVolumeBotUserId" version_id="1000070" version_string="1.0.0"><![CDATA[Both volume notices and the new thread are published by this account. Set to zero to pause rollover.]]></phrase>
+  <phrase title="xs_thread_volume_closed" version_id="1000070" version_string="1.0.0"><![CDATA[Тема закрыта. Откройте следующий том, чтобы ответить.]]></phrase>
+</phrases>
